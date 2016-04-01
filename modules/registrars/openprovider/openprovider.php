@@ -48,11 +48,13 @@ function openprovider_getConfigArray($params = array())
         (
             "FriendlyName"  => "Ascribe already used contacts to a new domain",
             "Type"          => "yesno",
-            "Description"   => "",
-        ),
+            "Description"   => "&zwnj;",
+        ), 
     );
 
-    if(isset($_REQUEST) && $_REQUEST['action'] == 'save' && end(explode(DIRECTORY_SEPARATOR, $_SERVER['SCRIPT_FILENAME'])) == 'configregistrars.php')
+    $x = explode(DIRECTORY_SEPARATOR, $_SERVER['SCRIPT_FILENAME']);
+    $filename = end($x);
+    if(isset($_REQUEST) && $_REQUEST['action'] == 'save' && $filename == 'configregistrars.php')
     {
         foreach($_REQUEST as $key => $val)
         {
@@ -140,7 +142,6 @@ function openprovider_RegisterDomain($params)
 //        {
             
             $fields         = \OpenProvider\APITools::getClientCustomFields($params['customfields']);
-            
             if(!is_object($additionalData))
                 $additionalData =   new \OpenProvider\CustomerAdditionalData();
             
@@ -178,8 +179,7 @@ function openprovider_RegisterDomain($params)
                 $billingCustomer    =   new \OpenProvider\Customer($params['original']);
                 $billingCustomer    ->  additionalData = $additionalData;
                 $billingHandle      =   \OpenProvider\APITools::createCustomerHandle($params, $billingCustomer);
-                
-                
+
                 $handles = array();
                 $handles['domainid'] = $params['domainid'];
                 $handles['ownerHandle'] = $ownerHandle;
@@ -204,7 +204,8 @@ function openprovider_RegisterDomain($params)
         $domainRegistration->techHandle     =   $handles['techHandle'];
         $domainRegistration->billingHandle  =   $handles['billingHandle'];
         $domainRegistration->nameServers    =   $nameServers;
-        
+        $domainRegistration->autorenew      =   'default';
+
         //use dns templates
         if($params['dnsTemplate'] && $params['dnsTemplate'] != 'None')
         {
@@ -219,6 +220,11 @@ function openprovider_RegisterDomain($params)
         {
             $domainRegistration->useDomicile = 1;
         }
+        // New feature.
+//        if($params['tld'] == 'nu'){
+//            $domainRegistration->additionalData->companyRegistrationNumber = $fields['socialSecurityNumber']; 
+//            $domainRegistration->additionalData->passportNumber = $fields['companyRegistrationNumber']; 
+//        }
         
         //Additional domain fileds
         if(!empty($params['additionalfields']))
@@ -919,21 +925,28 @@ function openprovider_Sync($params)
         ));
         
         $opInfo             =   $api->retrieveDomainRequest($domain);
-        $expiratioDate      =   date('Y-m-d', strtotime($opInfo['renewalDate']));
         
-        if(strtotime($opInfo['renewalDate']) < time())
+        $timestamp = strtotime($opInfo['renewalDate']);
+        if($timestamp === false){
+            logActivity('OpenProvider: Empty renewal date for domain: '.$params['sld'].'.'.$params['tld']);
+            return array('error' => 'OpenProvider: Empty renewal date for domain: '.$params['sld'].'.'.$params['tld']);
+        }
+
+        $expirationDate      =   date('Y-m-d', $timestamp);
+        
+        if($timestamp < time())
         {
             return array
             (
-                'expirydate'    =>  $expiratioDate,
+                'expirydate'    =>  $expirationDate,
                 'expired'       =>  true
-            );
+            );            
         }
         else
         {
             return array
             (
-                'expirydate'    =>  $expiratioDate,
+                'expirydate'    =>  $expirationDate,
                 'active'        =>  true
             );
         }

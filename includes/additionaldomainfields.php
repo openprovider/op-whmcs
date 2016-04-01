@@ -166,7 +166,7 @@ $additionaldomainfields[".fr"][] = array("Name" => "DUNS Number", 'LangVar' => '
 /********************************************* OpenProvider Domain Additional Fields ********************************************/
 if(file_exists(ROOTDIR.DIRECTORY_SEPARATOR.'modules'.DIRECTORY_SEPARATOR.'registrars'.DIRECTORY_SEPARATOR.'openprovider'.DIRECTORY_SEPARATOR.'additionaldomainfields.php'))
 {
-    global $additionaldomainfields;
+//    global $additionaldomainfields;
     require_once ROOTDIR.DIRECTORY_SEPARATOR.'modules'.DIRECTORY_SEPARATOR.'registrars'.DIRECTORY_SEPARATOR.'openprovider'.DIRECTORY_SEPARATOR.'additionaldomainfields.php';
 }
 /************************************************************************************************************************************/

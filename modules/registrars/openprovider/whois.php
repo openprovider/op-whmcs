@@ -1,7 +1,5 @@
 <?php
 
-die();
-
 require_once '..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'init.php';
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'openprovider.php';
 
